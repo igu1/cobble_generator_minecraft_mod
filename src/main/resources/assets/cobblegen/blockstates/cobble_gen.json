@@ -1,0 +1,70 @@
+{
+  "variants": {
+    "facing=east, lava_or_water=has_lava": {
+      "model": "cobblegen:block/cobble_gen_has_lava",
+      "y": 90
+    },
+    "facing=east, lava_or_water=has_water": {
+      "model": "cobblegen:block/cobble_gen_has_water",
+      "y": 90
+    },
+    "facing=east, lava_or_water=has_both": {
+      "model": "cobblegen:block/cobble_gen_has_both",
+      "y": 90
+    },
+    "facing=east, lava_or_water=no_both": {
+      "model": "cobblegen:block/cobble_gen_no_both",
+      "y": 90
+    },
+
+    "facing=north,lava_or_water=has_lava": {
+      "model": "cobblegen:block/cobble_gen_has_water"
+    },
+    "facing=north,lava_or_water=has_water": {
+      "model": "cobblegen:block/cobble_gen_has_water"
+    },
+    "facing=north, lava_or_water=has_both": {
+      "model": "cobblegen:block/cobble_gen_has_both"
+    },
+    "facing=north, lava_or_water=no_both": {
+      "model": "cobblegen:block/cobble_gen_no_both"
+    },
+
+
+    "facing=south,lava_or_water=has_lava": {
+      "model": "cobblegen:block/cobble_gen_has_lava",
+      "y": 180
+    },
+    "facing=south,lava_or_water=has_water": {
+      "model": "cobblegen:block/cobble_gen_has_water",
+      "y": 180
+    },
+    "facing=south, lava_or_water=has_both": {
+      "model": "cobblegen:block/cobble_gen_has_both",
+      "y": 180
+    },
+    "facing=south, lava_or_water=no_both": {
+      "model": "cobblegen:block/cobble_gen_no_both",
+      "y": 180
+    },
+
+
+
+    "facing=west,lava_or_water=has_lava": {
+      "model": "cobblegen:block/cobble_gen_has_lava",
+      "y": 270
+    },
+    "facing=west,lava_or_water=has_water": {
+      "model": "cobblegen:block/cobble_gen_has_water",
+      "y": 270
+    },
+    "facing=west, lava_or_water=has_both": {
+      "model": "cobblegen:block/cobble_gen_has_both",
+      "y": 270
+    },
+    "facing=west, lava_or_water=no_both": {
+      "model": "cobblegen:block/cobble_gen_no_both",
+      "y": 270
+    }
+  }
+}
