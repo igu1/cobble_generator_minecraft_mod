@@ -10,15 +10,22 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,10 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings("ConstantConditions")
 public class CobbleGenBlockEntity extends BlockEntity implements MenuProvider {
 
-    private static int tick;
-
-    private NonNullList<ItemStack> items = NonNullList.withSize(CobbleGenContainer.SIZE, ItemStack.EMPTY);
-
+    int tick;
     private final ItemStackHandler handler = new ItemStackHandler(CobbleGenContainer.SIZE) {
         @Override
         public boolean isItemValid(int slot, @NotNull ItemStack stack) {
@@ -73,15 +77,15 @@ public class CobbleGenBlockEntity extends BlockEntity implements MenuProvider {
         setState(level, pos, state, t);
         if (!level.isClientSide) {
             int SPEED = getGeneratingSpeed(level, pos, state, t);
-            tick++;
-            if (tick > SPEED * 20) {
-                CobbleGenBlockEntity blockEntity = (CobbleGenBlockEntity) t;
+            CobbleGenBlockEntity blockEntity = (CobbleGenBlockEntity)t;
+            blockEntity.tick++;
+            if (blockEntity.tick > SPEED * 20) {
                 blockEntity.getCapability(
                                 CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
                         .ifPresent(h -> {
-                            addCobbleToInv(h, level, pos, state, (CobbleGenBlockEntity) t);
+                            addCobbleToInv(h, level, pos, state, blockEntity);
                         });
-                tick = 0;
+                blockEntity.tick = 0;
             }
         }
     }
@@ -134,21 +138,23 @@ public class CobbleGenBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     private static void addCobbleToInv(IItemHandler h, Level level, BlockPos pos, BlockState state, CobbleGenBlockEntity t) {
-        if (level.getBlockEntity(pos.above()) != null && level.getBlockEntity(pos.above()) instanceof BaseContainerBlockEntity) {
-            level.getBlockEntity(pos.above()).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(chestHandler -> {
-                for (int x = 0; x < chestHandler.getSlots(); x++) {
-                    if (chestHandler.isItemValid(x, Items.COBBLESTONE.getDefaultInstance())) {
-                        if (chestHandler.getStackInSlot(x).is(Items.COBBLESTONE) || chestHandler.getStackInSlot(x).isEmpty()) {
-                            chestHandler.insertItem(x, Items.COBBLESTONE.getDefaultInstance(), false);
-                            break;
+    if (h.getSlotLimit(1) >= h.getStackInSlot(1).getCount()) {
+        if (h.isItemValid(0, new ItemStack(Items.WATER_BUCKET)) && h.isItemValid(2, new ItemStack(Items.LAVA_BUCKET))) {
+            if (h.getStackInSlot(0).is(Items.WATER_BUCKET) && h.getStackInSlot(2).is(Items.LAVA_BUCKET)) {
+                if (level.getBlockEntity(pos.above()) != null && level.getBlockEntity(pos.above()) instanceof BaseContainerBlockEntity) {
+                    level.getBlockEntity(pos.above()).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(chestHandler -> {
+                        for (int x = 0; x < chestHandler.getSlots(); x++) {
+                            if (chestHandler.isItemValid(x, Items.COBBLESTONE.getDefaultInstance())) {
+                                if (chestHandler.getStackInSlot(x).is(Items.COBBLESTONE) || chestHandler.getStackInSlot(x).isEmpty()) {
+                                    if (chestHandler.getStackInSlot(x).getCount() <= chestHandler.getSlotLimit(x)) {
+                                        chestHandler.insertItem(x, Items.COBBLESTONE.getDefaultInstance(), false);
+                                        break;
+                                    }
+                                }
+                            }
                         }
-                    }
-                }
-            });
-        } else {
-            if (h.getSlotLimit(1) >= h.getStackInSlot(1).getCount()) {
-                if (h.isItemValid(0, new ItemStack(Items.WATER_BUCKET)) && h.isItemValid(2, new ItemStack(Items.LAVA_BUCKET))) {
-                    if (h.getStackInSlot(0).is(Items.WATER_BUCKET) && h.getStackInSlot(2).is(Items.LAVA_BUCKET)) {
+                    });
+                } else {
                         h.insertItem(1, Items.COBBLESTONE.getDefaultInstance(), false);
                     }
                 }
@@ -203,7 +209,6 @@ public class CobbleGenBlockEntity extends BlockEntity implements MenuProvider {
     public AbstractContainerMenu createMenu(int p_39954_, Inventory p_39955_, Player p_39956_) {
         return new CobbleGenContainer(p_39954_, p_39955_, this);
     }
-
     //TODO
     //Netherite Module
 }
