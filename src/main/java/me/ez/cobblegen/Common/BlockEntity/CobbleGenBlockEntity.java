@@ -134,29 +134,29 @@ public class CobbleGenBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     private static void addCobbleToInv(IItemHandler h, Level level, BlockPos pos, BlockState state, CobbleGenBlockEntity t) {
-        if (level.getBlockEntity(pos.above()) != null && level.getBlockEntity(pos.above()) instanceof BaseContainerBlockEntity) {
-            level.getBlockEntity(pos.above()).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(chestHandler -> {
-                for (int x = 0; x < chestHandler.getSlots(); x++) {
-                    if (chestHandler.isItemValid(x, Items.COBBLESTONE.getDefaultInstance())) {
-                        if (chestHandler.getStackInSlot(x).is(Items.COBBLESTONE) || chestHandler.getStackInSlot(x).isEmpty()) {
-                            if (chestHandler.getStackInSlot(x).getCount() < chestHandler.getSlotLimit(x)) {
-                                chestHandler.insertItem(x, Items.COBBLESTONE.getDefaultInstance(), false);
-                                break;
+        if (h.getSlotLimit(1) >= h.getStackInSlot(1).getCount()) {
+            if (h.isItemValid(0, new ItemStack(Items.WATER_BUCKET)) && h.isItemValid(2, new ItemStack(Items.LAVA_BUCKET))) {
+                if (h.getStackInSlot(0).is(Items.WATER_BUCKET) && h.getStackInSlot(2).is(Items.LAVA_BUCKET)) {
+                    if (level.getBlockEntity(pos.above()) != null && level.getBlockEntity(pos.above()) instanceof BaseContainerBlockEntity) {
+                        level.getBlockEntity(pos.above()).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(chestHandler -> {
+                            for (int x = 0; x < chestHandler.getSlots(); x++) {
+                                if (chestHandler.isItemValid(x, Items.COBBLESTONE.getDefaultInstance())) {
+                                    if (chestHandler.getStackInSlot(x).is(Items.COBBLESTONE) || chestHandler.getStackInSlot(x).isEmpty()) {
+                                        if (chestHandler.getStackInSlot(x).getCount() < chestHandler.getSlotLimit(x)) {
+                                            chestHandler.insertItem(x, Items.COBBLESTONE.getDefaultInstance(), false);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                            h.insertItem(1, Items.COBBLESTONE.getDefaultInstance(), false);
+                                }
                             }
                         }
                     }
                 }
-            });
-        } else {
-            if (h.getSlotLimit(1) >= h.getStackInSlot(1).getCount()) {
-                if (h.isItemValid(0, new ItemStack(Items.WATER_BUCKET)) && h.isItemValid(2, new ItemStack(Items.LAVA_BUCKET))) {
-                    if (h.getStackInSlot(0).is(Items.WATER_BUCKET) && h.getStackInSlot(2).is(Items.LAVA_BUCKET)) {
-                        h.insertItem(1, Items.COBBLESTONE.getDefaultInstance(), false);
-                    }
-                }
-            }
-        }
-    }
 
     @Override
     public void load(CompoundTag tag) {
