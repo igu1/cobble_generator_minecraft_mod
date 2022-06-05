@@ -139,8 +139,10 @@ public class CobbleGenBlockEntity extends BlockEntity implements MenuProvider {
                 for (int x = 0; x < chestHandler.getSlots(); x++) {
                     if (chestHandler.isItemValid(x, Items.COBBLESTONE.getDefaultInstance())) {
                         if (chestHandler.getStackInSlot(x).is(Items.COBBLESTONE) || chestHandler.getStackInSlot(x).isEmpty()) {
-                            chestHandler.insertItem(x, Items.COBBLESTONE.getDefaultInstance(), false);
-                            break;
+                            if (chestHandler.getStackInSlot(x).getCount() < chestHandler.getSlotLimit(x)) {
+                                chestHandler.insertItem(x, Items.COBBLESTONE.getDefaultInstance(), false);
+                                break;
+                            }
                         }
                     }
                 }
