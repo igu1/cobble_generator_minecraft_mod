@@ -6,13 +6,12 @@ import me.ez.cobblegen.Common.Enums.LavaOrWater;
 import me.ez.cobblegen.Common.Items.SpeedModule;
 import me.ez.cobblegen.Init;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.world.Containers;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -22,7 +21,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -33,9 +31,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("ConstantConditions")
-public class CobbleGenBlockEntity extends BlockEntity implements MenuProvider {
+public class CobbleGenBlockEntity extends BaseContainerBlockEntity implements MenuProvider, WorldlyContainer {
 
-    private static int tick;
+    int tick;
 
     private NonNullList<ItemStack> items = NonNullList.withSize(CobbleGenContainer.SIZE, ItemStack.EMPTY);
 
@@ -63,7 +61,9 @@ public class CobbleGenBlockEntity extends BlockEntity implements MenuProvider {
             return slot == 1 ? 64 : super.getStackLimit(slot, stack);
         }
     };
-    private final LazyOptional<IItemHandler> handlerLazyOptional = LazyOptional.of(() -> handler);
+
+    private final LazyOptional<?> itemHandler = LazyOptional.of(this::createUnSidedHandler);
+
 
     public CobbleGenBlockEntity(BlockPos pos, BlockState state) {
         super(Init.COBBLE_GEN_BLOCK_ENTITY_TYPE_REGISTRY_OBJECT.get(), pos, state);
@@ -73,15 +73,15 @@ public class CobbleGenBlockEntity extends BlockEntity implements MenuProvider {
         setState(level, pos, state, t);
         if (!level.isClientSide) {
             int SPEED = getGeneratingSpeed(level, pos, state, t);
-            tick++;
-            if (tick > SPEED * 20) {
-                CobbleGenBlockEntity blockEntity = (CobbleGenBlockEntity) t;
+            CobbleGenBlockEntity blockEntity = (CobbleGenBlockEntity) t;
+            blockEntity.tick++;
+            if (blockEntity.tick > SPEED * 20) {
                 blockEntity.getCapability(
                                 CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
                         .ifPresent(h -> {
                             addCobbleToInv(h, level, pos, state, (CobbleGenBlockEntity) t);
                         });
-                tick = 0;
+                blockEntity.tick = 0;
             }
         }
     }
@@ -138,53 +138,63 @@ public class CobbleGenBlockEntity extends BlockEntity implements MenuProvider {
             if (h.isItemValid(0, new ItemStack(Items.WATER_BUCKET)) && h.isItemValid(2, new ItemStack(Items.LAVA_BUCKET))) {
                 if (h.getStackInSlot(0).is(Items.WATER_BUCKET) && h.getStackInSlot(2).is(Items.LAVA_BUCKET)) {
                     if (level.getBlockEntity(pos.above()) != null && level.getBlockEntity(pos.above()) instanceof BaseContainerBlockEntity) {
-                        level.getBlockEntity(pos.above()).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(chestHandler -> {
-                            for (int x = 0; x < chestHandler.getSlots(); x++) {
-                                if (chestHandler.isItemValid(x, Items.COBBLESTONE.getDefaultInstance())) {
-                                    if (chestHandler.getStackInSlot(x).is(Items.COBBLESTONE) || chestHandler.getStackInSlot(x).isEmpty()) {
-                                        if (chestHandler.getStackInSlot(x).getCount() < chestHandler.getSlotLimit(x)) {
+                            level.getBlockEntity(pos.above()).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(chestHandler -> {
+                                for (int x = 0; x < chestHandler.getSlots(); x++) {
+                                    if (chestHandler.isItemValid(x, Items.COBBLESTONE.getDefaultInstance())) {
+                                        if (chestHandler.getStackInSlot(x).is(Items.COBBLESTONE) || chestHandler.getStackInSlot(x).isEmpty()) {
                                             chestHandler.insertItem(x, Items.COBBLESTONE.getDefaultInstance(), false);
                                             break;
                                         }
                                     }
                                 }
-                            }
-                        });
+                            });
                     } else {
-                            h.insertItem(1, Items.COBBLESTONE.getDefaultInstance(), false);
-                                }
-                            }
-                        }
+                        h.insertItem(1, Items.COBBLESTONE.getDefaultInstance(), false);
                     }
                 }
+            }
+        }
+    }
 
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
-        handler.deserializeNBT(tag.getCompound("inv"));
+        ContainerHelper.saveAllItems(tag, items);
         tick = tag.getInt("tick");
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
-        tag.put("inv", handler.serializeNBT());
+        ContainerHelper.loadAllItems(tag, items);
         tag.putInt("tick", tick);
     }
 
-    @NotNull
     @Override
-    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap) {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            return handlerLazyOptional.cast();
-        }
-        return super.getCapability(cap);
+    public Component getDisplayName() {
+        return new TextComponent("Cobble Generator");
     }
 
     @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        handlerLazyOptional.invalidate();
+    protected Component getDefaultName() {
+        return new TextComponent("Cobble Generator");
+    }
+
+    @Override
+    protected AbstractContainerMenu createMenu(int i, Inventory inventory) {
+        return new CobbleGenContainer(i, inventory, this);
+    }
+
+    // Implements Of WorldlyContainer
+
+    @Override
+    public int @NotNull [] getSlotsForFace(Direction direction) {
+        return direction == Direction.DOWN ? new int[1] : new int[]{0, 2, 3};
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction direction) {
+        return this.canPlaceItem(slot, stack);
     }
 
     public void drops() {
@@ -196,14 +206,59 @@ public class CobbleGenBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    public Component getDisplayName() {
-        return new TextComponent("Cobble Generator");
+    public boolean canTakeItemThroughFace(int i, ItemStack stack, Direction direction) {
+        return i == 1 && stack.is(Items.COBBLESTONE) && direction == Direction.DOWN;
     }
 
-    @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int p_39954_, Inventory p_39955_, Player p_39956_) {
-        return new CobbleGenContainer(p_39954_, p_39955_, this);
+    public int getContainerSize() {
+        return CobbleGenContainer.SIZE;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        for(ItemStack itemstack : this.items) {
+            if (!itemstack.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public ItemStack getItem(int i) {
+        return items.get(i);
+    }
+
+    @Override
+    public ItemStack removeItem(int slot, int amount) {
+        return ContainerHelper.removeItem(items, slot, amount);
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int amount) {
+        return ContainerHelper.takeItem(this.items, amount);
+    }
+
+    @Override
+    public void setItem(int slot, ItemStack stack) {
+        items.set(slot, stack);
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        if (this.level.getBlockEntity(this.worldPosition) != this) {
+            return false;
+        } else {
+            return player.distanceToSqr((double)this.worldPosition.getX() + 0.5D,
+                    (double)this.worldPosition.getY() + 0.5D,
+                    (double)this.worldPosition.getZ() + 0.5D) <= 64.0D;
+        }
+    }
+
+    @Override
+    public void clearContent() {
+        items.clear();
     }
 
     //TODO
