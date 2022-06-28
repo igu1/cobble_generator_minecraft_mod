@@ -2,6 +2,7 @@ package me.ez.cobblegen;
 
 import com.mojang.logging.LogUtils;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
@@ -13,10 +14,10 @@ public class Main
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public Main() {
-        Init.BLOCK_DEFERRED_REGISTER.register(FMLJavaModLoadingContext.get().getModEventBus());
-        Init.ITEM_DEFERRED_REGISTER.register(FMLJavaModLoadingContext.get().getModEventBus());
-        Init.BLOCK_ENTITY_DEFERRED_REGISTER.register(FMLJavaModLoadingContext.get().getModEventBus());
-        Init.CONTAINER_DEFERRED_REGISTER.register(FMLJavaModLoadingContext.get().getModEventBus());
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        Init.ITEMS.register(bus);
+        Init.BLOCKS.register(bus);
+        Init.BLOCKENTITY_TYPE.register(bus);
         MinecraftForge.EVENT_BUS.register(this);
     }
 

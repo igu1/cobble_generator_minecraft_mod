@@ -1,19 +1,7 @@
 {
   "variants": {
-    "facing=east": {
-      "model": "cobblegen:block/cobble_gen",
-      "y": 270
-    },
-    "facing=north": {
-      "model": "cobblegen:block/cobble_gen",
-      "y": 180
-    },
-    "facing=south": {
+    "": {
       "model": "cobblegen:block/cobble_gen"
-    },
-    "facing=west": {
-      "model": "cobblegen:block/cobble_gen",
-      "y": 90
     }
   }
 }
