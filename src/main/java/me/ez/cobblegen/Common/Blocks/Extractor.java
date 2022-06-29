@@ -1,6 +1,8 @@
 package me.ez.cobblegen.Common.Blocks;
 
 import me.ez.cobblegen.Common.AbstractContainerBlockEntity.AbstractBlockEntityBlock;
+import me.ez.cobblegen.Common.BlockEntites.ExtractorBlockEntity;
+import me.ez.cobblegen.Init;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -21,21 +23,19 @@ public class Extractor extends AbstractBlockEntityBlock {
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return null;
+        return new ExtractorBlockEntity(pos, state);
     }
 
     @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return null;
+        return createTickerHelper(type, Init.EXTRACTOR_BLOCKENTITY.get(), ExtractorBlockEntity::tick);
     }
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand interactionHand, BlockHitResult hitResult) {
-        return null;
+        return InteractionResult.CONSUME;
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState blockState, boolean b) {
-
-    }
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState blockState, boolean b) {}
 }

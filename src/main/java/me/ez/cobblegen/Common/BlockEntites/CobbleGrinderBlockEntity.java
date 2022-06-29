@@ -36,6 +36,7 @@ public class CobbleGrinderBlockEntity extends BlockEntity {
                             level.getBlockEntity(blockPos.below()).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
                                 if (InventoryUtil.hasSpace(handler, Items.GRAVEL)) {
                                     InventoryUtil.addItemToInventory(handler, Items.GRAVEL, 1);
+                                    itemFound.set(false);
                                 }
                             });
                         }
