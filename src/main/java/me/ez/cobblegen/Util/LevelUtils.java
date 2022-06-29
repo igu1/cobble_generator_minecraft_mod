@@ -15,10 +15,9 @@ public class LevelUtils {
         if (level.getBlockEntity(topChest) != null) {
             BlockEntity assumedTopChest = level.getBlockEntity(topChest);
             if (assumedTopChest instanceof RandomizableContainerBlockEntity) {
-                assumedTopChest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
-
-                });
-                return true;
+                if (assumedTopChest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent()) {
+                    return true;
+                }
             }
         }
         return false;

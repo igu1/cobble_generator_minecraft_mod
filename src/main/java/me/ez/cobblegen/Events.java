@@ -11,9 +11,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public class Events {
 
     @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent event)
-    {
-//        ItemBlockRenderTypes.setRenderLayer(Init.COBBLE_GEN_BLOCK_REGISTRY_OBJECT.get(), RenderType.translucent());
-//        MenuScreens.register(Init.COBBLE_GEN_CONTAINER_REGISTRY_OBJECT.get(), CobbleGenScreen::new);
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        ItemBlockRenderTypes.setRenderLayer(Init.COBBLE_GENERATOR.get(), RenderType.cutout());
     }
 }

@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "cobblegen:block/cobble_generator"
+    }
+  }
+}

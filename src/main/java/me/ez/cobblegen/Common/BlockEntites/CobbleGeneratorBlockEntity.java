@@ -26,11 +26,13 @@ public class CobbleGeneratorBlockEntity extends BlockEntity {
     @SuppressWarnings("ConstantConditions")
     public static <E extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, E e) {
         if (!level.isClientSide){
-            if (checkCanITick(e, 2)){
+            if (checkCanITick(e, 3)){
                 if (LevelUtils.checkChestOnTop(level, pos)) {
                     BlockEntity assumedTopChest = level.getBlockEntity(pos.above());
                     assumedTopChest.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
-                        InventoryUtil.addItemToInventory(handler, Items.COBBLESTONE, 1);
+                        if (InventoryUtil.hasSpace(handler, Items.COBBLESTONE)) {
+                            InventoryUtil.addItemToInventory(handler, Items.COBBLESTONE, 1);
+                        }
                     });
                 }
             }
