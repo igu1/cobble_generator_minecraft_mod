@@ -5,7 +5,6 @@ import me.ez.cobblegen.Common.Blocks.CobbleGenerator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -35,9 +34,9 @@ public class Init {
         @Override
         public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> list, TooltipFlag p_40575_) {
             if (Screen.hasShiftDown()) {
-                list.add(new TextComponent("Info: Place a Chest Or Barrel Top Of The Generator\n").withStyle(ChatFormatting.DARK_AQUA));
+                list.add(Component.translatable("Info: Place a Chest Or Barrel Top Of The Generator\n").withStyle(ChatFormatting.DARK_AQUA));
             }else {
-                list.add(new TextComponent("Hold Shift For More Information").withStyle(ChatFormatting.GRAY));
+                list.add(Component.translatable("Hold Shift For More Information").withStyle(ChatFormatting.GRAY));
             }
         }
     });

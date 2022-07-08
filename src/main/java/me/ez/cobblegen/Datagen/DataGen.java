@@ -9,6 +9,6 @@ import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 public class DataGen {
     @SubscribeEvent
     public static void onGatheringData(GatherDataEvent e){
-        e.getGenerator().addProvider(new ModRecipeProvider(e.getGenerator()));
+        e.getGenerator().addProvider(true, new ModRecipeProvider(e.getGenerator()));
     }
 }
